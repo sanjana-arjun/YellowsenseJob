@@ -1,0 +1,32 @@
+.job-card {
+  border: 1px solid #ddd;
+  padding: 16px;
+  margin: 8px 0;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+}
+
+.job-card h3 {
+  margin: 0 0 8px;
+  font-size: 1.2em;
+}
+
+.job-card p {
+  margin: 0 0 8px;
+  font-size: 1em;
+  color: #555;
+}
+
+.bookmark-button {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.bookmark-button:hover {
+  background-color: #0056b3;
+}
