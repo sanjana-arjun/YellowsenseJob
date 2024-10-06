@@ -1,7 +1,8 @@
 import React, {Component} from 'react'
-import {Link} from 'react-router-dom'
+import {useSwipeable} from 'react-swipeable'
 import axios from 'axios'
 
+// Your styles here
 const styles = {
   container: {
     padding: 16,
@@ -15,24 +16,9 @@ const styles = {
     borderRadius: 8,
     backgroundColor: '#fff',
     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
     width: '100%',
     maxWidth: '600px',
-    position: 'relative',
-    overflow: 'hidden',
     cursor: 'pointer',
-  },
-  cardHover: {
-    transform: 'scale(1.03)',
-    boxShadow: '0 6px 18px rgba(0, 0, 0, 0.2)',
-  },
-  cardHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottom: '1px solid #eee',
-    paddingBottom: 10,
-    marginBottom: 10,
   },
   title: {
     fontSize: '1.2em',
@@ -40,35 +26,30 @@ const styles = {
     color: '#333',
     margin: 0,
   },
-  tag: {
-    backgroundColor: '#28a745',
-    color: '#fff',
-    padding: '5px 10px',
-    borderRadius: 12,
-    fontSize: '0.9em',
-  },
-  details: {
-    margin: 0,
+  detail: {
+    fontSize: '1em',
     color: '#555',
+    margin: '10px 0',
   },
-  link: {
-    textDecoration: 'none',
-    color: 'inherit',
-  },
-  bookmarkButton: {
-    padding: '10px 20px',
-    border: 'none',
-    borderRadius: 5,
-    backgroundColor: '#007bff',
-    color: '#fff',
-    fontSize: '0.9em',
-    cursor: 'pointer',
-    transition: 'background-color 0.3s ease',
-    marginTop: 10,
-  },
-  bookmarkButtonHover: {
-    backgroundColor: '#0056b3',
-  },
+}
+
+const JobCard = ({job, onBookmark, onDismiss}) => {
+  const handlers = useSwipeable({
+    onSwipedRight: () => onBookmark(job),
+    onSwipedLeft: () => onDismiss(job),
+  })
+
+  return (
+    <div {...handlers} style={styles.card}>
+      <h3 style={styles.title}>{job.title}</h3>
+      <p style={styles.detail}>
+        <strong>Location:</strong> {job.primary_details?.Place || 'N/A'}
+      </p>
+      <p style={styles.detail}>
+        <strong>Salary:</strong> {job.primary_details?.Salary || 'N/A'}
+      </p>
+    </div>
+  )
 }
 
 class Jobs extends Component {
@@ -107,10 +88,7 @@ class Jobs extends Component {
         throw new Error('Data format error')
       }
     } catch (error) {
-      this.setState({
-        error: 'Failed to fetch jobs',
-        isLoading: false,
-      })
+      this.setState({error: 'Failed to fetch jobs', isLoading: false})
     }
   }
 
@@ -126,10 +104,16 @@ class Jobs extends Component {
   handleBookmark = job => {
     const {handleBookmark} = this.props
     handleBookmark(job)
+    console.log(`Job bookmarked: ${job.title}`)
+  }
+
+  handleDismiss = job => {
+    console.log(`Job dismissed: ${job.title}`)
+    // Additional logic to handle dismissal can go here
   }
 
   render() {
-    const {jobs, isLoading, error, hoveredJobId} = this.state
+    const {jobs, isLoading, error} = this.state
 
     if (isLoading) return <p>Loading...</p>
     if (error) return <p>{error}</p>
@@ -138,34 +122,12 @@ class Jobs extends Component {
     return (
       <div style={styles.container}>
         {jobs.map(job => (
-          <div
+          <JobCard
             key={job.id}
-            style={{
-              ...styles.card,
-              ...(hoveredJobId === job.id ? styles.cardHover : {}),
-            }}
-            onMouseEnter={() => this.setState({hoveredJobId: job.id})}
-            onMouseLeave={() => this.setState({hoveredJobId: null})}
-          >
-            <Link to={`/job-details/${job.id}`} style={styles.link}>
-              <div style={styles.cardHeader}>
-                <h3 style={styles.title}>{job.title}</h3>
-                <span style={styles.tag}>New</span>
-              </div>
-              <p style={styles.details}>
-                Location: {job.primary_details?.Place || 'N/A'}
-              </p>
-              <p style={styles.details}>
-                Salary: {job.primary_details?.Salary || 'N/A'}
-              </p>
-            </Link>
-            <button
-              onClick={() => this.handleBookmark(job)}
-              style={styles.bookmarkButton}
-            >
-              Bookmark
-            </button>
-          </div>
+            job={job}
+            onBookmark={this.handleBookmark}
+            onDismiss={this.handleDismiss}
+          />
         ))}
       </div>
     )
